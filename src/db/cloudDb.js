@@ -36,7 +36,12 @@ export async function getLogsByDate(date) {
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  const logs = snapshot.docs.map(d => {
+    console.log('log doc id:', d.id); // 调试
+    return { id: d.id, ...d.data() };
+  });
+  console.log('getLogsByDate result:', logs); // 调试
+  return logs;
 }
 
 export async function getAllLogs() {
