@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getLogsByDate, addLog as dbAddLog, updateLog as dbUpdateLog, deleteLog as dbDeleteLog } from '../db/db.js';
+import { getLogsByDate, addLog as dbAddLog, updateLog as dbUpdateLog, deleteLog as dbDeleteLog, getAllLogs as dbGetAllLogs } from '../db/cloudDb.js';
 
 export const useLogsStore = create((set, get) => ({
   logs: [],
@@ -43,6 +43,15 @@ export const useLogsStore = create((set, get) => ({
       set({ logs });
     } catch (error) {
       console.error('Failed to delete log:', error);
+    }
+  },
+
+  getAllLogs: async () => {
+    try {
+      return await dbGetAllLogs();
+    } catch (error) {
+      console.error('Failed to get all logs:', error);
+      return [];
     }
   },
 }));
