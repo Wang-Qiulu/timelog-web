@@ -5,25 +5,37 @@ import Dashboard from './components/Dashboard';
 import Settings from './components/Settings';
 import { useLogsStore } from './store/useLogsStore';
 import { useUserStore } from './store/useUserStore';
-import { auth, signInAnon } from './firebase/config';
 
 export default function App() {
   const fetchLogs = useLogsStore(state => state.fetchLogs);
   const username = useUserStore(state => state.username);
   const saveUsername = useUserStore(state => state.saveUsername);
-  const fetchUsername = useUserStore(state => state.fetchUsername);
+  const init = useUserStore(state => state.init);
+  const error = useUserStore(state => state.error);
+  const loading = useUserStore(state => state.loading);
 
-  const [initialized, setInitialized] = useState(false);
-  const [user, setUser] = useState(null);
   const [inputName, setInputName] = useState('');
-  const [showNameInput, setShowNameInput] = useState(false);
   const [nameError, setNameError] = useState('');
+  const [ready, setReady] = useState(false);
+
+  // 初始化 - 检查localStorage
+  useEffect(() => {
+    init();
+  }, []);
+
+  // localStorage有用户名，直接获取数据
+  useEffect(() => {
+    if (username) {
+      fetchLogs();
+      setReady(true);
+    }
+  }, [username, fetchLogs]);
 
   // 验证用户名
   const validateName = (name) => {
     const trimmed = name.trim();
     if (trimmed.length < 2 || trimmed.length > 20) {
-      return '用户名需要2-20个字';
+      return '需要2-20个字';
     }
     if (!/^[\u4e00-\u9fa5a-zA-Z0-9]+$/.test(trimmed)) {
       return '只能使用中文、英文、数字';
@@ -31,67 +43,22 @@ export default function App() {
     return '';
   };
 
-  // 处理登录
-  const handleLogin = async () => {
-    try {
-      await signInAnon();
-    } catch (e) {
-      console.error('登录失败:', e);
-      alert('登录失败: ' + e.message);
-    }
-  };
-
-  // 处理保存用户名
-  const handleSaveName = async () => {
+  // 保存用户名
+  const handleSave = async () => {
     const error = validateName(inputName);
     if (error) {
       setNameError(error);
       return;
     }
-    await saveUsername(inputName.trim());
-    setShowNameInput(false);
+
+    setNameError('');
+    const success = await saveUsername(inputName.trim());
+    if (success) {
+      setReady(true);
+    }
   };
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      setUser(user);
-      setInitialized(true);
-
-      if (user) {
-        await fetchUsername();
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (user && username === '') {
-      setShowNameInput(true);
-    }
-  }, [user, username]);
-
-  if (!initialized) {
-    return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
-        <div className="text-gray-400">加载中...</div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
-        <button
-          onClick={handleLogin}
-          className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800"
-        >
-          开始使用
-        </button>
-      </div>
-    );
-  }
-
-  if (showNameInput || !username) {
+  if (!ready) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="text-center">
@@ -104,15 +71,19 @@ export default function App() {
               setInputName(e.target.value);
               setNameError('');
             }}
+            onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             placeholder="2-20字，中文/英文/数字"
             className="w-64 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 mb-2"
           />
-          {nameError && <p className="text-red-500 text-sm mb-2">{nameError}</p>}
+          {(nameError || error) && (
+            <p className="text-red-500 text-sm mb-2">{nameError || error}</p>
+          )}
           <button
-            onClick={handleSaveName}
-            className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800"
+            onClick={handleSave}
+            disabled={loading}
+            className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 disabled:opacity-50"
           >
-            确定
+            {loading ? '保存中...' : '确定'}
           </button>
         </div>
       </div>
