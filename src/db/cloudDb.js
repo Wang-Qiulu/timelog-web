@@ -1,16 +1,21 @@
-import { addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, collection, onSnapshot, getDoc } from 'firebase/firestore';
+import { addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, collection } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useUserStore } from '../store/useUserStore';
 
 const COLLECTION = 'timeLogs';
 
 function getUsername() {
-  return useUserStore.getState().username;
+  const state = useUserStore.getState();
+  console.log('getUsername:', state.username); // 调试
+  return state.username;
 }
 
 export async function addLog(log) {
   const username = getUsername();
-  if (!username) throw new Error('用户未登录');
+  if (!username) {
+    console.error('addLog: 用户名空'); // 调试
+    throw new Error('用户未登录');
+  }
 
   return addDoc(collection(db, 'users', username, COLLECTION), {
     ...log,
@@ -57,9 +62,12 @@ export async function updateLog(id, updates) {
 
 export async function deleteLog(id) {
   const username = getUsername();
-  if (!username) throw new Error('用户未登录');
+  console.log('deleteLog:', username, id); // 调试
+  if (!username) {
+    console.error('deleteLog: 用户名空');
+    throw new Error('用户未登录');
+  }
 
   const docRef = doc(db, 'users', username, COLLECTION, id);
-  console.log('Deleting:', docRef.path); // 调试
   return deleteDoc(docRef);
 }
