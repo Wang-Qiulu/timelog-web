@@ -36,12 +36,11 @@ export async function getLogsByDate(date) {
   );
 
   const snapshot = await getDocs(q);
-  const logs = snapshot.docs.map(d => {
-    console.log('log doc id:', d.id); // 调试
-    return { id: d.id, ...d.data() };
+  return snapshot.docs.map(d => {
+    const data = d.data();
+    // 确保使用文档ID，而不是数据里的id字段
+    return { ...data, id: d.id };
   });
-  console.log('getLogsByDate result:', logs); // 调试
-  return logs;
 }
 
 export async function getAllLogs() {
@@ -50,7 +49,10 @@ export async function getAllLogs() {
 
   const q = query(collection(db, 'users', username, COLLECTION), orderBy('endTime', 'desc'));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map(d => {
+    const data = d.data();
+    return { ...data, id: d.id };
+  });
 }
 
 export async function updateLog(id, updates) {

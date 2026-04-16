@@ -42,7 +42,6 @@ export const useTimerStore = create((set, get) => ({
     const duration = Math.round((endTime - state.startTime) / 1000 / 60 * 10) / 10; // 分钟，保留一位小数
 
     const log = {
-      id: uuidv4(),
       description: state.description,
       categoryId: state.categoryId,
       startTime: state.startTime,
