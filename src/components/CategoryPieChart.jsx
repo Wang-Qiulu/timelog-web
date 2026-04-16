@@ -1,11 +1,22 @@
 import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useLogsStore } from '../store/useLogsStore';
 import { getCategories } from '../constants/categories';
+import { getAllLogs } from '../db/cloudDb';
 
-export default function CategoryPieChart() {
+export default function CategoryPieChart({ mode = 'today' }) {
   const logs = useLogsStore(state => state.logs);
+  const [historyLogs, setHistoryLogs] = useState([]);
   const categories = getCategories();
+
+  useEffect(() => {
+    if (mode === 'history') {
+      getAllLogs().then(setHistoryLogs);
+    }
+  }, [mode]);
+
+  const displayLogs = mode === 'today' ? logs : historyLogs;
 
   const chartData = useMemo(() => {
     const categoryMap = new Map();
@@ -14,7 +25,7 @@ export default function CategoryPieChart() {
       categoryMap.set(cat.id, { name: cat.name, value: 0, color: cat.color });
     });
 
-    logs.forEach(log => {
+    displayLogs.forEach(log => {
       const entry = categoryMap.get(log.categoryId);
       if (entry) {
         entry.value += log.duration;
@@ -27,7 +38,9 @@ export default function CategoryPieChart() {
         ...item,
         value: Math.round(item.value * 10) / 10,
       }));
-  }, [logs, categories]);
+  }, [displayLogs, categories]);
+
+  const title = mode === 'today' ? '时间分布' : '历史时间分布';
 
   if (chartData.length === 0) {
     return (
@@ -39,7 +52,7 @@ export default function CategoryPieChart() {
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 p-4">
-      <h3 className="text-sm font-medium text-gray-500 mb-2">时间分布</h3>
+      <h3 className="text-sm font-medium text-gray-500 mb-2">{title}</h3>
       <ResponsiveContainer width="100%" height={200}>
         <PieChart>
           <Pie

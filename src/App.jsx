@@ -17,6 +17,14 @@ export default function App() {
   const [inputName, setInputName] = useState('');
   const [nameError, setNameError] = useState('');
   const [ready, setReady] = useState(false);
+  const [mode, setMode] = useState('today'); // today | history
+
+  // 监听切换模式事件
+  useEffect(() => {
+    const handler = (e) => setMode(e.detail);
+    window.addEventListener('switchMode', handler);
+    return () => window.removeEventListener('switchMode', handler);
+  }, []);
 
   // 初始化 - 检查localStorage
   useEffect(() => {
@@ -58,6 +66,12 @@ export default function App() {
     }
   };
 
+  // 切换模式
+  const switchMode = (newMode) => {
+    setMode(newMode);
+    window.dispatchEvent(new CustomEvent('switchMode', { detail: newMode }));
+  };
+
   if (!ready) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
@@ -96,10 +110,10 @@ export default function App() {
       <main className="max-w-6xl mx-auto px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <Timeline />
+            <Timeline mode={mode} />
           </div>
           <div className="lg:col-span-1">
-            <Dashboard />
+            <Dashboard mode={mode} />
           </div>
         </div>
         <div className="mt-8">
