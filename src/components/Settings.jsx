@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getCategories, saveCategories, DEFAULT_CATEGORIES } from '../constants/categories';
-import { getAllLogs } from '../db/db.js';
+import { getAllLogs } from '../db/cloudDb.js';
 import { exportToJSON, exportToCSV } from '../utils/export.js';
 
 export default function Settings() {
