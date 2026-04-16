@@ -1,4 +1,4 @@
-import { addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, collection } from 'firebase/firestore';
+import { addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc, query, where, orderBy, collection } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useUserStore } from '../store/useUserStore';
 
@@ -59,16 +59,17 @@ export async function deleteLog(id) {
   const username = getUsername();
   if (!username) throw new Error('用户未登录');
 
-  console.log('deleteLog path:', `users/${username}/${COLLECTION}/${id}`); // 调试路径
+  console.log('deleting:', `users/${username}/${COLLECTION}/${id}`);
 
+  // 先检查文档是否存在
   const docRef = doc(db, 'users', username, COLLECTION, id);
+  const docSnap = await getDoc(docRef);
 
-  try {
-    await deleteDoc(docRef);
-    console.log('删除成功');
-    return true;
-  } catch (error) {
-    console.error('删除失败:', error);
-    throw error;
+  if (!docSnap.exists()) {
+    console.error('文档不存在:', id);
+    throw new Error('记录不存在');
   }
+
+  await deleteDoc(docRef);
+  console.log('删除成功');
 }
