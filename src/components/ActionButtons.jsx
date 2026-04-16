@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from 'framer-motion';
 import { useTimerStore } from '../store/useTimerStore';
 import { useLogsStore } from '../store/useLogsStore';
 
@@ -32,43 +31,32 @@ export default function ActionButtons() {
 
   return (
     <div className="flex items-center gap-3">
-      <motion.button
+      <button
         onClick={handleStart}
         disabled={timerState === 'running'}
         className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        whileTap={{ scale: 0.98 }}
-        animate={timerState === 'running' ? { opacity: 0.5 } : {}}
       >
         {timerState === 'running' ? '进行中...' : '开始'}
-      </motion.button>
+      </button>
 
-      <AnimatePresence>
-        {timerState === 'running' && (
-          <motion.div
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: 'auto' }}
-            exit={{ opacity: 0, width: 0 }}
-            className="flex items-center gap-3"
+      {timerState === 'running' && (
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleComplete}
+            disabled={!canComplete}
+            className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
-            <motion.button
-              onClick={handleComplete}
-              disabled={!canComplete}
-              className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              whileTap={canComplete ? { scale: 0.98 } : {}}
-            >
-              完成并记录
-            </motion.button>
+            完成并记录
+          </button>
 
-            <motion.button
-              onClick={handleReset}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors px-2"
-              whileTap={{ scale: 0.95 }}
-            >
-              放弃
-            </motion.button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <button
+            onClick={handleReset}
+            className="text-sm text-gray-400 hover:text-gray-600 transition-colors px-2"
+          >
+            放弃
+          </button>
+        </div>
+      )}
     </div>
   );
 }

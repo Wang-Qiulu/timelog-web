@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { formatTime, formatMinutes } from '../utils/time.js';
 import { getCategories } from '../constants/categories';
 import { useLogsStore } from '../store/useLogsStore';
@@ -8,20 +7,14 @@ export default function TimelineItem({ log }) {
   const categories = getCategories();
   const category = categories.find(c => c.id === log.categoryId) || categories[0];
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (confirm('确定删除这条记录吗？')) {
-      deleteLog(log.id);
+      await deleteLog(log.id);
     }
   };
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="flex items-start gap-4 py-3 border-b border-gray-50 last:border-0"
-    >
+    <div className="flex items-start gap-4 py-3 border-b border-gray-50 last:border-0">
       <div
         className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
         style={{ backgroundColor: category.color }}
@@ -46,6 +39,6 @@ export default function TimelineItem({ log }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
-    </motion.div>
+    </div>
   );
 }
