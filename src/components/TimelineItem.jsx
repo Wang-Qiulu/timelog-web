@@ -8,6 +8,7 @@ export default function TimelineItem({ log }) {
   const category = categories.find(c => c.id === log.categoryId) || categories[0];
 
   const handleDelete = async () => {
+    console.log('TimelineItem删除:', log.id); // 调试
     if (confirm('确定删除这条记录吗？')) {
       await deleteLog(log.id);
     }
