@@ -1,4 +1,4 @@
-import { addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, collection, onSnapshot } from 'firebase/firestore';
+import { addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, collection, onSnapshot, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useUserStore } from '../store/useUserStore';
 
@@ -59,5 +59,7 @@ export async function deleteLog(id) {
   const username = getUsername();
   if (!username) throw new Error('用户未登录');
 
-  return deleteDoc(doc(db, 'users', username, COLLECTION, id));
+  const docRef = doc(db, 'users', username, COLLECTION, id);
+  console.log('Deleting:', docRef.path); // 调试
+  return deleteDoc(docRef);
 }
