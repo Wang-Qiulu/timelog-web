@@ -18,8 +18,6 @@ export default function ActionButtons() {
     if (log) {
       await addLog(log);
     }
-    // 强制刷新状态
-    window.location.reload();
   };
 
   const handleStart = () => {
