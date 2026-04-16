@@ -5,17 +5,12 @@ import { useUserStore } from '../store/useUserStore';
 const COLLECTION = 'timeLogs';
 
 function getUsername() {
-  const state = useUserStore.getState();
-  console.log('getUsername:', state.username); // 调试
-  return state.username;
+  return useUserStore.getState().username;
 }
 
 export async function addLog(log) {
   const username = getUsername();
-  if (!username) {
-    console.error('addLog: 用户名空'); // 调试
-    throw new Error('用户未登录');
-  }
+  if (!username) throw new Error('用户未登录');
 
   return addDoc(collection(db, 'users', username, COLLECTION), {
     ...log,
@@ -62,12 +57,18 @@ export async function updateLog(id, updates) {
 
 export async function deleteLog(id) {
   const username = getUsername();
-  console.log('deleteLog:', username, id); // 调试
-  if (!username) {
-    console.error('deleteLog: 用户名空');
-    throw new Error('用户未登录');
-  }
+  if (!username) throw new Error('用户未登录');
+
+  console.log('deleteLog path:', `users/${username}/${COLLECTION}/${id}`); // 调试路径
 
   const docRef = doc(db, 'users', username, COLLECTION, id);
-  return deleteDoc(docRef);
+
+  try {
+    await deleteDoc(docRef);
+    console.log('删除成功');
+    return true;
+  } catch (error) {
+    console.error('删除失败:', error);
+    throw error;
+  }
 }
